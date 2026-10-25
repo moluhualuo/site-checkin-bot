@@ -1,4 +1,4 @@
-# 每天 08:10 自动签到
+﻿# 每天 08:10 自动签到
 # 用法：右键「使用 PowerShell 运行」，或在 PowerShell 里执行 .\install-task.ps1
 
 $ErrorActionPreference = 'Stop'
