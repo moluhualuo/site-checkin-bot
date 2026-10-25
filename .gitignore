@@ -1,0 +1,14 @@
+data/
+ref-cdp/
+node_modules/
+*.log
+
+# 敏感：真实凭据不入库，模板见 config/sites.example.json
+config/sites.json
+# 截图含 token 片段
+screenshot.png
+# 与本工具无关的本地脚本
+.workbuddy-ai/
+fill_member.py
+fill_member_formula.py
+patch_cached.py

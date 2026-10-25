@@ -1,0 +1,19 @@
+{
+  "name": "auto-checkin",
+  "version": "1.0.0",
+  "private": true,
+  "description": "多站点自动签到（含 Cloudflare Turnstile / WAF 过盾）",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "web": "node server.mjs --open",
+    "server": "node server.mjs",
+    "run": "node checkin.mjs run",
+    "doctor": "node checkin.mjs doctor",
+    "status": "node checkin.mjs status",
+    "login": "node checkin.mjs login"
+  },
+  "dependencies": {}
+}

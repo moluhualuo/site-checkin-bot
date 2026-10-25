@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>自动签到控制台</title>
+<link rel="stylesheet" href="/style.css" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%235b8cff'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='%23fff' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>
+    </div>
+    <div class="brand-text">
+      <h1>自动签到控制台</h1>
+      <p id="sub">正在连接服务…</p>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <div class="status idle" id="status">
+      <span class="pulse"></span>
+      <span id="statusText">空闲</span>
+    </div>
+    <button class="btn ghost" id="btnDoctor" title="检查浏览器、网络与凭据">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1m0-12.8l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>
+      体检
+    </button>
+    <button class="btn ghost" id="btnSettings" title="全局设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 8.9 19a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      设置
+    </button>
+    <button class="btn primary" id="btnRunAll">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11l-1 8.5L19.5 10H13z"/></svg>
+      <span>全部签到</span>
+    </button>
+  </div>
+</header>
+
+<main>
+  <section class="stats" id="stats"></section>
+
+  <div class="section-head">
+    <h2>站点</h2>
+    <span class="hint">关闭开关可临时停用该站点，不影响配置</span>
+  </div>
+
+  <section class="grid" id="sites">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>运行日志</h2>
+      <div class="panel-tools">
+        <label class="mini-check"><input type="checkbox" id="autoScroll" checked /> 自动滚动</label>
+        <button class="btn tiny" id="btnClearLog">清空</button>
+      </div>
+    </div>
+    <div class="log" id="log"></div>
+  </section>
+
+  <footer class="foot">
+    <span>凭据保存在本机 <code>data/creds.json</code>，不会上传</span>
+    <span id="footChrome"></span>
+  </footer>
+</main>
+
+<!-- 站点配置 -->
+<dialog id="dlgSite" class="dlg">
+  <form method="dialog" class="dlg-body" id="siteForm">
+    <div class="dlg-head">
+      <div>
+        <h3 id="siteTitle">站点配置</h3>
+        <p id="siteSub"></p>
+      </div>
+      <button class="icon-btn" value="cancel" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="fields" id="siteFields"></div>
+    <div class="dlg-foot">
+      <button class="btn danger-ghost" type="button" id="btnClearCred">清除凭据</button>
+      <div class="spacer"></div>
+      <button class="btn ghost" value="cancel">取消</button>
+      <button class="btn primary" type="button" id="btnSaveSite">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- 全局设置 -->
+<dialog id="dlgSettings" class="dlg">
+  <form method="dialog" class="dlg-body">
+    <div class="dlg-head">
+      <div>
+        <h3>全局设置</h3>
+        <p>LinuxDO 账号用于福利站自动授权</p>
+      </div>
+      <button class="icon-btn" value="cancel" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <div class="fields">
+      <label class="field">
+        <span>LinuxDO 用户名</span>
+        <input type="text" id="setUser" placeholder="不填则福利站需手动登录" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span>LinuxDO 密码 <em id="setPassHint"></em></span>
+        <input type="password" id="setPass" placeholder="留空则不修改" autocomplete="new-password" />
+      </label>
+      <label class="field">
+        <span>linux.do 会话 Cookie <em id="setCookieHint"></em></span>
+        <textarea id="setCookie" placeholder="留空则不修改。填了就能跳过登录和拼图，例如：&#10;_t=xxx; _forum_session=yyy"></textarea>
+      </label>
+      <label class="field">
+        <span>代理地址</span>
+        <input type="text" id="setProxy" placeholder="http://127.0.0.1:7897（留空=直连）" autocomplete="off" />
+      </label>
+      <label class="field">
+        <span>Webhook 通知</span>
+        <input type="text" id="setWebhook" placeholder="签到结束后 POST 结果到这里，可留空" autocomplete="off" />
+      </label>
+      <label class="switch-row">
+        <input type="checkbox" id="setHeadless" />
+        <span>
+          <strong>无头模式</strong>
+          <small>Turnstile 站点在无头模式下会被识别，建议保持关闭</small>
+        </span>
+      </label>
+    </div>
+
+    <div class="dlg-foot">
+      <div class="spacer"></div>
+      <button class="btn ghost" value="cancel">取消</button>
+      <button class="btn primary" type="button" id="btnSaveSettings">保存</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- 体检结果 -->
+<dialog id="dlgDoctor" class="dlg">
+  <form method="dialog" class="dlg-body">
+    <div class="dlg-head">
+      <div>
+        <h3>环境体检</h3>
+        <p>检查浏览器、网络连通性与凭据状态</p>
+      </div>
+      <button class="icon-btn" value="cancel" aria-label="关闭">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="checks" id="doctorList"></div>
+    <div class="dlg-foot">
+      <div class="spacer"></div>
+      <button class="btn primary" value="ok">关闭</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
